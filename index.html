@@ -14,6 +14,20 @@
 .factor{outline:3px solid #bd6b35;outline-offset:-4px;background:#fff0dc}.multiply-arrow{grid-column:2/6;grid-row:3/5;width:100%;height:100%;align-self:stretch;z-index:2;pointer-events:none;overflow:visible}.arrow-halo{fill:none;stroke:#fffef9;stroke-width:8;stroke-linecap:round}.arrow-line{fill:none;stroke:#ad4c2f;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
 .operation-picker{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.operation-picker button{display:flex;align-items:center;gap:10px;background:#edf1e6;color:var(--ink);box-shadow:0 3px 0 #d0d9ca;border:2px solid transparent}.operation-picker button[aria-pressed="true"]{background:var(--green);color:#fff;border-color:#15483b}.operation-picker span{font-size:27px;color:#a26924}.operation-picker button[aria-pressed="true"] span{color:var(--yellow)}.division-equation{grid-column:1/-1;font-size:28px;font-weight:800;text-align:center;padding:14px}.division-work{grid-column:1/-1;background:#ecf2e8;border-radius:14px;padding:14px;line-height:1.7;font-size:17px}.crossed-digit{position:relative;display:inline-block;line-height:1.1}.crossed-digit::after{content:"";position:absolute;left:-12%;top:48%;width:124%;height:3px;background:#ad4c2f;transform:rotate(-35deg);border-radius:2px}.regrouped-value{color:#ad4c2f;font-style:italic;font-weight:900}@media(max-width:600px){.operation-picker button{flex:1 1 42%;padding:10px;font-size:14px}}
 .answer-fields{display:flex;gap:16px;margin-bottom:14px}.answer-fields input{width:100px;height:65px;border:2px solid #b2c3a3;border-radius:16px;text-align:center;font-size:34px;font-weight:800;background:#fffef9;color:var(--ink)}.answer-fields input:focus{border-color:#ac7a18;background:#fff2c5}#carryInput{border-color:#bd6b35}#carryDestination{margin:0 0 14px}
+
+/* Division uses one coordinate system for every digit and rule. */
+.grid.division-board{display:block;width:100%;max-width:410px;margin:24px auto 12px}
+.division-board svg{display:block;width:100%;height:auto;overflow:visible}
+.division-board .division-digit{font:700 32px 'Trebuchet MS',sans-serif;font-variant-numeric:tabular-nums;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.division-board .division-rule{fill:none;stroke:#527362;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.division-board .division-target{fill:#f8cb57;stroke:#ac7a18;stroke-width:1.5}
+.division-board .division-completed{fill:#236957}
+.division-board .division-question{fill:#795817}
+.workspace:has(.division-board){grid-template-columns:minmax(300px,1fr) minmax(300px,1fr)}
+@media(max-width:900px){.workspace:has(.division-board){grid-template-columns:1fr}.board:has(.division-board){padding:22px}.division-board svg{max-height:650px}}
+@media(max-width:420px){.board:has(.division-board){padding:16px}.board:has(.division-board) .board-top{flex-wrap:wrap}}
+
+.calculation-support{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 0 0;font-size:14px;font-weight:700;color:#526b59;cursor:pointer;min-height:44px}.calculation-support input{width:22px;height:22px;accent-color:var(--green);cursor:pointer}.division-board .bring-arrow{fill:none;stroke:#b56c27;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}.division-board .bring-source{fill:#fff2c5;stroke:#b56c27;stroke-width:1.5}
 </style>
 </head>
 <body>
@@ -23,7 +37,7 @@
 <section class="setup" aria-label="Set up your round"><div class="eyebrow">Choose your adventure</div><div class="operation-picker" role="group" aria-label="Choose a math section"><button type="button" data-operation="add" aria-pressed="false"><span>+</span>Addition</button><button type="button" data-operation="subtract" aria-pressed="false"><span>−</span>Subtraction</button><button type="button" data-operation="multiply" aria-pressed="true"><span>×</span>Multiplication</button><button type="button" data-operation="divide" aria-pressed="false"><span>÷</span>Division</button></div><div class="toolbar"><label>Difficulty<select id="level"><option value="starter" selected>Level 1 · 2 digits × 1 digit</option><option value="classic">Level 2 · 2 digits × 2 digits</option><option value="challenge">Level 3 · Bigger numbers</option></select></label><label>Problems in a round<select id="roundLength"><option value="5" selected>5 problems</option><option value="10">10 problems</option></select></label><button id="new">Start practice ↗</button><button class="secondary" id="example">Try 21 × 34</button></div><p class="setup-note">Each game is one full math problem. Starting a round begins a fresh score.</p><div class="daily-card"><div><strong>★ The daily challenge</strong><p id="dailyDescription">Five fresh problems every day, at your chosen difficulty.</p></div><button id="daily">Play today's 5 →</button></div></section>
 <div class="round-status" id="roundStatus" hidden aria-live="polite"><div><strong id="roundTitle"></strong><p id="roundCount"></p></div><div class="round-dots" id="roundDots" aria-hidden="true"></div></div>
 <div class="workspace" id="workspace" hidden>
-<section class="board" aria-label="Math working board"><div class="board-top"><span class="tag">Your number notebook</span><span class="mission" id="problemName"></span></div><div class="grid" id="math" role="img" aria-label=""></div><p class="board-note"><span class="legend-dot"></span><span id="digitGuide"></span> <span id="directionGuide">Follow the yellow column, from right to left.</span></p></section>
+<section class="board" aria-label="Math working board"><div class="board-top"><span class="tag">Your number notebook</span><span class="mission" id="problemName"></span></div><label class="calculation-support" id="supportControl" hidden><input id="calculationSupport" type="checkbox" checked>Calculation support · bring-down arrow</label><div class="grid" id="math" role="img" aria-label=""></div><p class="board-note"><span class="legend-dot"></span><span id="digitGuide"></span> <span id="directionGuide">Follow the yellow column, from right to left.</span></p></section>
 <section class="lesson" aria-label="Step-by-step lesson"><div class="lesson-head"><span id="stepCount"></span><span>One step at a time</span></div><div class="progress" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" id="progress"><div class="progress-fill" id="progressFill"></div></div><div id="instruction" aria-live="polite" aria-atomic="true"><div class="eyebrow" id="phase"></div><h2 id="prompt"></h2><p class="explanation" id="explanation"></p></div><form id="answerForm"><div class="answer-fields"><div id="carryField" hidden><label class="answer-label" for="carryInput">Carry digit</label><input id="carryInput" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" aria-describedby="explanation carryDestination"></div><div><label class="answer-label" for="input">Answer digit</label><input id="input" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" aria-describedby="explanation" aria-label="Your answer digit"></div></div><p id="carryDestination" class="setup-note" hidden></p><div class="answer-row"><button id="check" type="submit">Check answer ✓</button><button id="next" type="button" hidden>Next step →</button></div><div class="keypad" id="keypad" aria-label="Number buttons"></div></form><div id="complete" class="complete" hidden aria-hidden="true">★ ★ ★</div><div class="message" id="message" role="status"></div><div class="hint" id="hint" hidden></div><div class="lesson-tools"><button class="text-button" id="help">Give me a hint</button><button class="text-button" id="reset">Start this one again</button></div><div id="roundSummary" class="round-summary" hidden></div><button id="playAgain" hidden>Another adventure ↗</button></section>
 </div><p class="footer">Take your time. Every try helps your brain grow.</p>
 </main><div class="burst" id="burst" aria-hidden="true"></div>
@@ -53,13 +67,17 @@ function combineCarrySteps(list){
 function arithmeticSteps(x,y){
  const list=[];
  if(operation==='divide'){
-  let remainder=0;const digits=String(x);
+  let remainder=0,started=false,cycle=0;const digits=String(x);
   for(let i=0;i<digits.length;i++){
    const current=remainder*10+Number(digits[i]),q=Math.floor(current/y),c=digits.length-1-i;
-   if(i===0&&q===0){remainder=current;continue}
-   list.push({kind:'quotient',r:0,c,answer:q,phase:'Divide from left to right',title:current+' ÷ '+y+' = ?',text:(i?'Bring down '+digits[i]+'. ':'')+'How many groups of '+y+' fit into '+current+'? Write the quotient digit in the '+places[c]+' place.',hint:y+' × '+q+' = '+q*y+'. Write '+q+'.'});
+   if(!started&&q===0&&i<digits.length-1){remainder=current;continue}
+   const meta={cycle,end:i,current,product:q*y,c};
+   if(started)list.push({...meta,kind:'bring',answer:Number(digits[i]),phase:'Bring down',title:'Bring down the next digit',text:'Copy '+digits[i]+' from the dividend into the next column, beside the remainder.',hint:'Bring down '+digits[i]+'.'});
+   list.push({...meta,kind:'quotient',answer:q,phase:'Divide',title:current+' ÷ '+y+' = ?',text:'How many groups of '+y+' fit into '+current+'? Write one digit above this column.',hint:y+' × '+q+' = '+q*y+'. Write '+q+'.'});
+   list.push({...meta,kind:'product',answer:q*y,phase:'Multiply',title:q+' × '+y+' = ?',text:'Multiply the quotient digit by the divisor. Write the full product beneath '+current+'.',hint:q+' × '+y+' = '+q*y+'.'});
    remainder=current%y;
-   list.push({kind:'remainder',r:1,c,answer:remainder,current,product:q*y,phase:'Subtract to find what is left',title:current+' − '+q*y+' = ?',text:'Subtract the groups you used. '+(c?'Carry what is left into the next digit.':'This is the final remainder. These problems divide evenly.'),hint:current+' − '+q*y+' = '+remainder+'.'});
+   list.push({...meta,kind:'remainder',answer:remainder,phase:'Subtract',title:current+' − '+q*y+' = ?',text:'Subtract the product from '+current+'. '+(c?'Keep the remainder, then bring down the next digit.':'The remainder is zero. Your division is complete!'),hint:current+' − '+q*y+' = '+remainder+'.'});
+   started=true;cycle++;
   }
   return combineCarrySteps(list);
  }
@@ -86,15 +104,9 @@ function renderArithmetic(s,done){
  done.forEach(t=>{if(t.updates)t.updates.forEach(([c,v])=>top[c]=v);if(t.carry)carries.set(t.carry.c,t.carry.answer);if(t.kind==='write'||t.kind==='quotient')values.set(t.c,t.answer)});
  $('math').replaceChildren();
  const width=Math.max(String(a).length,String(result()).length);
- for(let c=0;c<width;c++)cell(1,c,places[c],'place');
+ if(operation!=='divide')for(let c=0;c<width;c++)cell(1,c,places[c],'place');
  if(operation==='divide'){
-  const equation=document.createElement('div');equation.className='division-equation';equation.style.gridRow=2;equation.textContent=a+' ÷ '+b+' =';$('math').append(equation);
-  for(let c=0;c<String(result()).length;c++)cell(3,c,values.get(c)??'','answer-box '+(s&&s.kind==='quotient'&&s.c===c?'active':'filled'));
-  const work=document.createElement('div');work.className='division-work';work.style.gridRow=4;
-  const lines=done.filter(t=>t.kind==='remainder').map(t=>t.current+' − '+t.product+' = '+t.answer);
-  work.textContent=lines.length?lines.join('  ·  '):'Divide, subtract, then bring down the next digit.';
-  if(s&&s.kind==='remainder'){const prompt=document.createElement('div');prompt.textContent=s.title;work.append(prompt);cell(5,s.c,answered?s.answer:'?','answer-box active')}
-  $('math').append(work);
+  renderDivision(s,done);
  }else{
   for(let c=0;c<width;c++){
    const carrying=s&&s.carry&&s.carry.c===c;
@@ -113,6 +125,46 @@ function renderArithmetic(s,done){
  }
  $('digitGuide').textContent='The answer has '+String(result()).length+' digits.';
  $('math').setAttribute('aria-label',a+' '+symbols[operation]+' '+b+'. '+(s?s.title+' '+s.text:'Answer: '+result()));
+}
+
+function renderDivision(s,done){
+ const root=$('math'),ns='http://www.w3.org/2000/svg',digits=String(a),cols=digits.length;
+ root.replaceChildren();
+ const cycles=steps.filter(t=>t.kind==='quotient'),last=cycles.length-1;
+ const svg=document.createElementNS(ns,'svg');
+ svg.setAttribute('viewBox',`0 0 ${112+cols*46} ${158+cycles.length*112}`);
+ svg.setAttribute('aria-hidden','true');root.append(svg);
+ function el(tag,attrs,text){const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;svg.append(e);return e}
+ const x=i=>100+i*46,y=k=>160+k*112;
+ function number(value,end,row,active=false){
+  const str=String(value),left=end-str.length+1;
+  if(active)el('rect',{x:x(left)-20,y:row-22,width:str.length*46-6,height:44,rx:9,class:'division-target'});
+  [...str].forEach((d,j)=>el('text',{x:x(left+j),y:row,class:'division-digit'+(active?' division-question':' division-completed')},active&&!answered?'?':d));
+ }
+ function target(step,row){const visible=done.includes(step);if(visible||s===step)number(step.answer,step.end,row,s===step&&!answered)}
+ // The top rule and left stem are a single continuous bracket.
+ el('path',{d:`M 70 112 V 77 Q 70 71 76 71 H ${x(cols-1)+23}`,class:'division-rule'});
+ el('text',{x:35,y:104,class:'division-digit'},b);
+ // Show the route only while bringing a digit down or dividing that new number.
+ const guided=s&&$('calculationSupport').checked&&(s.kind==='bring'||s.kind==='quotient')&&steps.some(t=>t.kind==='bring'&&t.cycle===s.cycle);
+ if(guided){
+  const cx=x(s.end),dest=y(s.cycle)-56-27;
+  el('rect',{x:cx-19,y:82,width:38,height:44,rx:8,class:'bring-source'});
+  el('path',{d:`M ${cx} 132 V ${dest} M ${cx-6} ${dest-8} L ${cx} ${dest} L ${cx+6} ${dest-8}`,class:'bring-arrow'});
+ }
+ [...digits].forEach((d,i)=>el('text',{x:x(i),y:104,class:'division-digit'},d));
+ for(const q of cycles){
+  const k=q.cycle,product=steps.find(t=>t.cycle===k&&t.kind==='product'),rem=steps.find(t=>t.cycle===k&&t.kind==='remainder'),bring=steps.find(t=>t.cycle===k&&t.kind==='bring');
+  target(q,42);
+  if(bring)target(bring,y(k)-56);
+  target(product,y(k));
+  if(done.includes(product)||s===rem){
+   const start=q.end-String(q.current).length+1;
+   el('text',{x:x(start)-35,y:y(k),class:'division-digit'},'−');
+   el('path',{d:`M ${x(start)-20} ${y(k)+28} H ${x(q.end)+20}`,class:'division-rule'});
+  }
+  target(rem,y(k)+56);
+ }
 }
 
 function localDate(date=new Date()){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0')}
@@ -157,6 +209,8 @@ function multiplicationArrow(multiplierCol,multiplicandCol){
  $('math').append(svg);
 }
 function render(){
+ $('math').classList.toggle('division-board',operation==='divide');
+ $('supportControl').hidden=operation!=='divide';
  const s=steps[index],done=steps.slice(0,index+(answered?1:0)),values=new Map(),carries=new Map();
  done.forEach(t=>{if(t.carry)carries.set(t.carry.kind+'-'+t.carry.r+'-'+t.carry.c,t.carry.answer);values.set(t.r+'-'+t.c,t.answer)});
  const two=b>=10,adding=s&&(s.kind==='sum'||s.kind==='addCarry'),activeCol=s?s.c:-1,multiplying=s&&Number.isInteger(s.multiplyCol);
@@ -181,13 +235,17 @@ function render(){
  $('digitGuide').textContent='The answer has '+String(a*b).length+' digits. One box for each digit.';
  $('math').setAttribute('aria-label',a+' times '+b+'. The answer has '+String(a*b).length+' digits. '+(s?s.title+' '+s.text+(multiplying?' Follow the arrow from '+digit(b,s.r)+' in the bottom number to '+digit(a,s.multiplyCol)+' in the top number.':''):'Answer: '+a*b));
  }
- $('directionGuide').textContent=operation==='divide'?'Work from left to right. Divide, subtract, and bring down.':'Follow the yellow column, from right to left.';
+ $('directionGuide').textContent=operation==='divide'?'Divide → Multiply → Subtract → Bring down.':'Follow the yellow column, from right to left.';
  $('problemName').textContent=operationNames[operation]+' · '+mission;
  $('stars').textContent=stars;
  const count=index+(answered?1:0),percent=Math.round(count/steps.length*100);
  $('stepCount').textContent=s?'Step '+(index+1)+' of '+steps.length:'Adventure complete!';$('progress').setAttribute('aria-valuenow',percent);$('progressFill').style.transform='scaleX('+(count/steps.length)+')';
  $('phase').textContent=s?s.phase:'You did it!';$('prompt').textContent=s?s.title:a+' '+symbols[operation]+' '+b+' = '+result();
  $('explanation').textContent=s?s.text:'Every little step added up to something amazing. Ready for another adventure?';
+ const answerLength=operation==='divide'&&s?String(s.answer).length:1;
+ $('input').maxLength=answerLength;$('input').pattern='[0-9]{1,'+answerLength+'}';
+ $('input').setAttribute('aria-label',answerLength>1?'Your answer':'Your answer digit');
+ document.querySelector('label[for="input"]').textContent=answerLength>1?'Your answer ('+answerLength+' digits)':'Answer digit';
  $('answerForm').hidden=!s;$('complete').hidden=!!s;$('check').hidden=answered;$('next').hidden=!answered;$('next').textContent=index===steps.length-1?'Finish adventure ★':'Next step →';$('input').disabled=answered;$('carryInput').disabled=answered;$('carryField').hidden=!s?.carry;$('carryDestination').hidden=!s?.carry;$('carryDestination').textContent=s?.carry?'Carry into the '+places[s.carry.c]+' column.':'';
  $('keypad').hidden=answered;$('help').hidden=!s||answered;$('playAgain').hidden=!!s;renderRound();
 }
@@ -198,17 +256,18 @@ function check(e){
  e.preventDefault();const step=steps[index];if(answered||!step)return;
  const value=$('input').value.trim(),carryValue=$('carryInput').value.trim();
  function error(message,target){$('message').textContent=message;$('message').className='message error';activeInput=target;$(target).focus({preventScroll:true});$(target).select()}
- if(!/^\d$/.test(value)){error('Enter an answer digit from 0 to 9.','input');return}
+ if(!(operation==='divide'?/^\d{1,2}$/:/^\d$/).test(value)){error(operation==='divide'?'Enter your answer using the number buttons.':'Enter an answer digit from 0 to 9.','input');return}
  if(step.carry&&!/^\d$/.test(carryValue)){error('Enter the carry digit too. Both digits belong to this step.','carryInput');return}
  if(Number(value)!==step.answer){error('Good try! Check the answer digit again. A hint can help.','input');return}
  if(step.carry&&Number(carryValue)!==step.carry.answer){error('Your answer digit is right. Try the carry digit again.','carryInput');return}
  answered=true;stars++;$('message').className='message';$('message').textContent=step.carry?'You got both digits! Write '+value+' and carry '+carryValue+'.':['Great thinking! You earned a star.','You got it! Your brain is growing.','Wonderful work! One step closer.','That’s it! Keep shining.'][stars%4];$('hint').hidden=true;render();celebrate();$('next').focus({preventScroll:true});
 }
 function nextProblem(){if(!round||index<steps.length)return;if(round.completed===round.problems.length){beginRound('practice');return}round.position++;mission=round.position+1;start(...round.problems[round.position]);}
+$('calculationSupport').addEventListener('change',()=>render());
 $('answerForm').addEventListener('submit',check);
-for(const id of ['input','carryInput']){$(id).addEventListener('focus',()=>{activeInput=id});$(id).addEventListener('input',()=>{$(id).value=$(id).value.replace(/\D/g,'').slice(-1)})}
+for(const id of ['input','carryInput']){$(id).addEventListener('focus',()=>{activeInput=id});$(id).addEventListener('input',()=>{$(id).value=$(id).value.replace(/\D/g,'').slice(0,$(id).maxLength)})}
 $('next').onclick=()=>{if(!answered)return;index++;answered=false;$('input').value='';$('carryInput').value='';activeInput='input';clearFeedback();render();if(index===steps.length){if(round)round.completed=round.position+1;renderRound();$('message').textContent='Amazing effort! You solved every step.';celebrate(true);$('playAgain').focus({preventScroll:true})}};
-for(let n=0;n<=9;n++){const key=document.createElement('button');key.type='button';key.textContent=n;key.setAttribute('aria-label','Enter '+n);key.onclick=()=>{if(!answered){$(activeInput).value=String(n);clearFeedback()}};$('keypad').append(key)}
+for(let n=0;n<=9;n++){const key=document.createElement('button');key.type='button';key.textContent=n;key.setAttribute('aria-label','Enter '+n);key.onclick=()=>{if(!answered){const field=$(activeInput);field.value=field.maxLength>1?(field.value.length>=field.maxLength?String(n):field.value+String(n)):String(n);clearFeedback()}};$('keypad').append(key)}
 $('help').onclick=()=>{$('hint').textContent=steps[index].hint;$('hint').hidden=false};$('reset').onclick=()=>start(a,b);$('new').onclick=()=>beginRound('practice');$('playAgain').onclick=nextProblem;$('daily').onclick=()=>beginRound('daily');$('example').onclick=()=>beginRound('practice',true);
 document.querySelectorAll('[data-operation]').forEach(button=>button.onclick=()=>selectOperation(button.dataset.operation));
 $('dailyDescription').textContent='Five fresh problems for '+localDate()+', at your chosen difficulty. Come back tomorrow for a new set!';
