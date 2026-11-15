@@ -36,12 +36,21 @@
 #writingCanvas{display:block;width:100%;height:auto;aspect-ratio:9/10;border:1px solid #d6ddd0;border-radius:14px;background:repeating-linear-gradient(to bottom,#fffef9 0,#fffef9 39px,#e8eee5 40px);touch-action:none;cursor:crosshair}
 .free-answer{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-top:18px}.free-answer label{display:grid;gap:8px;font-weight:800}.free-answer input{width:180px;height:55px;font-size:28px;border:2px solid #b2c3a3;border-radius:12px;padding:8px;color:var(--ink)}
 #writingFeedback{min-height:28px;font-weight:800;margin:14px 0}
-</style>
+.tracker{background:#fffdf7;border:2px solid #dedfce;border-radius:24px;padding:24px;margin:26px 0}.tracker-head{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}.tracker h2{margin:7px 0}.tracker-note{font-size:14px;line-height:1.5;color:#62756c}.tracker-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.tracker-stats>div{background:#edf2e8;border-radius:16px;padding:16px}.tracker-stats span{display:block;font-size:13px;font-weight:700}.tracker-stats strong{display:block;font-size:32px;margin-top:6px;color:#236957}.tracker summary{cursor:pointer;font-weight:800;padding:12px 0;min-height:44px}.calendar-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:15px 0}.calendar-heading button{padding:8px 16px;min-height:44px}.calendar-heading h3{font-size:18px;text-align:center}.star-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.calendar-weekday{text-align:center;font-size:12px;font-weight:800;padding:8px 0;color:#62756c}.calendar-day{background:#f1f4eb;border-radius:10px;min-height:68px;padding:9px;font-size:13px}.calendar-day strong{display:block;color:#875900;margin-top:8px;font-size:16px}.calendar-day.today{outline:2px solid #236957;outline-offset:-2px}.calendar-day.earned{background:#fff0bb}.history-scroll{overflow-x:auto}.tracker-history{width:100%;border-collapse:collapse;text-align:left;font-size:14px;margin-top:18px}.tracker-history caption{text-align:left;font-weight:800;padding:12px 0}.tracker-history th,.tracker-history td{padding:12px 8px;border-bottom:1px solid #dedfce}.tracker-history th{color:#526b59}@media(max-width:600px){.tracker{padding:16px}.tracker-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-day{padding:7px 4px;min-height:60px}.calendar-day strong{font-size:13px}.star-calendar{gap:4px}}
+.player-bar{margin:22px 0;background:#e8efdf;border:2px solid #d7e0cd;border-radius:20px;padding:16px 20px}.player-picker{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-weight:800}.player-picker select{min-width:140px}.player-bar form:not([hidden]){display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}.player-bar input{font:inherit;min-height:48px;max-width:100%;padding:10px;border:2px solid #b2c3a3;border-radius:12px}.player-bar p{margin-bottom:0}.backup-actions{display:flex;gap:8px;flex-wrap:wrap}.backup-actions button{min-height:36px;padding:7px 11px;font-size:12px;border-radius:10px;box-shadow:0 2px 0 #d0d9ca;font-weight:700}.restore-preview{background:#fff0bb;border:1px solid #ebd08c;border-radius:16px;padding:18px;margin:18px 0;line-height:1.5}.restore-preview button{margin-top:6px}</style>
 </head>
 <body>
 <main class="shell">
-<header><div class="brand"><span class="brand-mark" aria-hidden="true">×</span> Math Adventure</div><div class="stars" aria-live="polite"><span class="star-icon" aria-hidden="true">★</span> <span id="stars">0</span> stars today</div></header>
+<header><div class="brand"><span class="brand-mark" aria-hidden="true">×</span> Math Adventure</div><div class="stars" aria-live="polite"><span class="star-icon" aria-hidden="true">★</span> <span id="stars">0</span> stars today</div></header><section class="player-bar" aria-label="Player"><div class="player-picker"><label for="playerSelect">Playing as</label><select id="playerSelect" aria-describedby="playerMessage"></select><button id="addPlayer" type="button" class="secondary">＋ Add player</button></div><form id="addPlayerForm" hidden><label for="playerNameInput">Nickname</label><input id="playerNameInput" maxlength="24" autocomplete="off" placeholder="Enter a nickname" required><button type="submit">Add player</button><button id="cancelPlayer" class="secondary" type="button">Cancel</button></form><p id="playerMessage" class="tracker-note" role="status">Each player has their own stars on this device. Switching players starts a fresh round. These profiles do not have passwords.</p></section>
 <h1>Little steps. Big discoveries.</h1><p class="intro">Add, subtract, multiply, and divide—one little step at a time. You've got this!</p>
+<section class="tracker" aria-labelledby="trackerTitle">
+ <div class="tracker-head"><div><div class="eyebrow">Little steps add up</div><h2 id="trackerTitle">Eva’s Star Tracker</h2></div><div class="backup-actions"><button id="exportTracker" class="secondary" type="button">Export backup ↓</button><button id="importTracker" class="secondary" type="button">Import / Restore ↑</button></div></div>
+ <input id="restoreFile" type="file" accept=".json,application/json" hidden><div id="restorePreview" class="restore-preview" hidden><p id="restoreSummary"></p><p>Existing dates stay. For a date in both histories, keep the record with more stars (keep the current record on a tie). Totals are not added together, so importing the same backup twice won’t double the stars. Restoring ends any current practice round.</p><button id="confirmRestore" type="button">Restore this backup</button> <button id="cancelRestore" class="secondary" type="button">Cancel</button></div><p id="restoreMessage" class="tracker-note" role="status"></p><p class="tracker-note">Each player’s progress stays on this device. Other devices and families keep their own records.</p>
+ <div class="tracker-stats"><div><span>Today</span><strong id="trackerToday">0</strong></div><div><span>This week</span><strong id="trackerWeek">0</strong></div><div><span>All time</span><strong id="trackerTotal">0</strong></div><div><span>Questions tracked</span><strong id="trackerQuestions">0</strong></div></div>
+ <details><summary>View daily history</summary><div class="calendar-heading"><button id="previousMonth" class="secondary" type="button" aria-label="Previous month">←</button><h3 id="calendarMonth"></h3><button id="nextMonth" class="secondary" type="button" aria-label="Next month">→</button></div><div id="starCalendar" class="star-calendar" aria-label="Daily star calendar"></div><p class="tracker-note">★ Stars earned each day · 2 per completed question, or 1 after an incorrect answer.</p><div class="history-scroll"><table class="tracker-history"><caption>Recorded practice days</caption><thead><tr><th scope="col">Date</th><th scope="col">Stars</th><th scope="col">2-star questions</th><th scope="col">1-star questions</th></tr></thead><tbody id="trackerHistory"></tbody></table></div><p id="trackerEmpty" class="tracker-note">Complete your first question to start Eva’s history.</p></details>
+ <p id="trackerStorageNote" class="tracker-note" role="status">Saved in this browser. Clearing website data can erase progress. Export a backup occasionally.</p>
+</section>
+
 <section class="setup" aria-label="Set up your round"><div class="eyebrow">Choose your adventure</div><div class="operation-picker" role="group" aria-label="Choose a math section"><button type="button" data-operation="add" aria-pressed="false"><span>+</span>Addition</button><button type="button" data-operation="subtract" aria-pressed="false"><span>−</span>Subtraction</button><button type="button" data-operation="multiply" aria-pressed="true"><span>×</span>Multiplication</button><button type="button" data-operation="divide" aria-pressed="false"><span>÷</span>Division</button></div><div class="toolbar"><label>Difficulty<select id="level"><option value="starter" selected>Level 1 · 2 digits × 1 digit</option><option value="classic">Level 2 · 2 digits × 2 digits</option><option value="challenge">Level 3 · Bigger numbers</option></select></label><label>Problems in a round<select id="roundLength"><option value="5" selected>5 problems</option><option value="10">10 problems</option></select></label><button id="new">Start practice ↗</button><button class="secondary" id="example">Try 21 × 34</button></div><p class="setup-note">Each completed question earns 2 stars, or 1 star after an incorrect answer. Stars add up today across all rounds and operations.</p><div class="daily-card"><div><strong>★ The daily challenge</strong><p id="dailyDescription">Five fresh problems every day, at your chosen difficulty.</p></div><button id="daily">Play today's 5 →</button></div></section>
 <div class="round-status" id="roundStatus" hidden aria-live="polite"><div><strong id="roundTitle"></strong><p id="roundCount"></p></div><div class="round-dots" id="roundDots" aria-hidden="true"></div></div>
 <div class="mode-control"><label for="workMode">Calculation support</label><select id="workMode"><option value="guided">On · step-by-step help</option><option value="writing">Off · write on the notebook</option></select></div><div class="workspace" id="workspace" hidden>
@@ -310,15 +319,100 @@ $('writingAnswerForm').addEventListener('submit',event=>{event.preventDefault();
 $('writingNext').onclick=nextProblem;
 
 
+const profilesKey='eva-math-players-v1';
+let profiles=[{id:'eva',name:'Eva'}],activePlayer='eva';
+try{const saved=JSON.parse(localStorage.getItem(profilesKey)||'null');if(saved&&Array.isArray(saved.players)){for(const player of saved.players){if(player&&typeof player.id==='string'&&/^[a-z0-9-]+$/.test(player.id)&&player.id!=='eva'&&typeof player.name==='string'&&player.name.trim()&&player.name.length<=24&&!profiles.some(p=>p.id===player.id))profiles.push({id:player.id,name:player.name.trim()})}if(profiles.some(p=>p.id===saved.active))activePlayer=saved.active}}catch{}
+const playerName=()=>profiles.find(p=>p.id===activePlayer).name;
+const playerTrackerKey=()=>activePlayer==='eva'?'eva-math-tracker-v1':'eva-math-tracker-v1-'+activePlayer;
+function savePlayers(){try{localStorage.setItem(profilesKey,JSON.stringify({players:profiles,active:activePlayer}))}catch{$('playerMessage').textContent='Player names cannot be saved in this browser. Export progress before closing.'}}
+function renderPlayers(){const picker=$('playerSelect');picker.replaceChildren();for(const player of profiles){const option=document.createElement('option');option.value=player.id;option.textContent=player.name;picker.append(option)}picker.value=activePlayer}
+function switchPlayer(id){
+ if(!profiles.some(p=>p.id===id))return;
+ clearTimeout(advanceTimer);activePlayer=id;trackerKey=playerTrackerKey();tracker={version:1,player:playerName(),days:{}};trackerStorageOK=true;loadTracker();migrateLegacyStars();
+ questionScore={wrong:false,awarded:false,earned:0};round=null;steps=[];index=0;answered=false;resetWriting();$('workspace').hidden=true;$('roundStatus').hidden=true;clearFeedback();calendarDate=new Date(new Date().getFullYear(),new Date().getMonth(),1);savePlayers();renderPlayers();syncDailyStars();$('playerMessage').textContent='Ready, '+playerName()+'! Choose an adventure and start a new round.';
+}
+$('playerSelect').addEventListener('change',()=>switchPlayer($('playerSelect').value));
+$('addPlayer').onclick=()=>{$('addPlayerForm').hidden=false;$('playerNameInput').focus()};
+$('cancelPlayer').onclick=()=>{$('addPlayerForm').hidden=true;$('playerNameInput').value=''};
+$('addPlayerForm').addEventListener('submit',event=>{event.preventDefault();const name=$('playerNameInput').value.trim();if(!name||name.length>24){$('playerMessage').textContent='Enter a nickname with 1–24 characters.';return}if(profiles.some(p=>p.name.toLocaleLowerCase()===name.toLocaleLowerCase())){$('playerMessage').textContent='That player already exists. Choose their name above.';return}const id='p-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);profiles.push({id,name});$('addPlayerForm').hidden=true;$('playerNameInput').value='';switchPlayer(id)});
+renderPlayers();
+
 const dailyStarsKey='eva-math-daily-stars-v1';
+let trackerKey=playerTrackerKey();
 let starDay='',questionScore={wrong:false,awarded:false,earned:0};
-function readDailyStars(){try{const data=JSON.parse(localStorage.getItem(dailyStarsKey)||'null');return data&&data.date===localDate()&&Number.isSafeInteger(data.total)&&data.total>=0?data.total:0}catch{return starDay===localDate()?stars:0}}
-function syncDailyStars(){stars=readDailyStars();starDay=localDate();$('stars').textContent=stars;}
-function awardQuestionStars(){if(questionScore.awarded)return;syncDailyStars();questionScore.earned=questionScore.wrong?1:2;questionScore.awarded=true;stars+=questionScore.earned;try{localStorage.setItem(dailyStarsKey,JSON.stringify({date:starDay,total:stars}))}catch{}$('stars').textContent=stars;}
+let tracker={version:1,player:playerName(),days:{}},trackerStorageOK=true;
+let calendarDate=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+function validDay(day){return /^\d{4}-\d{2}-\d{2}$/.test(day)&&localDate(new Date(day+'T12:00:00'))===day}
+function loadTracker(){
+ try{const raw=localStorage.getItem(trackerKey);if(raw){const saved=JSON.parse(raw);if(saved.version!==1||!saved.days||typeof saved.days!=='object')throw Error('Invalid tracker');const days={};for(const [day,row] of Object.entries(saved.days)){if(validDay(day)&&row&&['stars','clean','retry','legacy'].every(k=>Number.isSafeInteger(row[k])&&row[k]>=0)&&row.stars===row.clean*2+row.retry+row.legacy)days[day]={stars:row.stars,clean:row.clean,retry:row.retry,legacy:row.legacy}}tracker={version:1,player:playerName(),days}}}catch{trackerStorageOK=false}
+}
+function saveTracker(){try{localStorage.setItem(trackerKey,JSON.stringify(tracker));trackerStorageOK=true}catch{trackerStorageOK=false}}
+loadTracker();
+// Carry forward the old saved daily total without inventing question counts.
+function migrateLegacyStars(){if(activePlayer!=='eva')return;try{const old=JSON.parse(localStorage.getItem(dailyStarsKey)||'null');if(old&&validDay(old.date)&&Number.isSafeInteger(old.total)&&old.total>0&&!tracker.days[old.date]){tracker.days[old.date]={stars:old.total,clean:0,retry:0,legacy:old.total};saveTracker()}}catch{}}
+migrateLegacyStars();
+function syncDailyStars(){stars=tracker.days[localDate()]?.stars||0;starDay=localDate();$('stars').textContent=stars;renderTracker()}
+function awardQuestionStars(){
+ if(questionScore.awarded)return;
+ // Read other tabs' completed awards before adding this question.
+ if(trackerStorageOK)loadTracker();
+ const day=localDate(),row=tracker.days[day]||{stars:0,clean:0,retry:0,legacy:0};
+ questionScore.earned=questionScore.wrong?1:2;questionScore.awarded=true;
+ row.stars+=questionScore.earned;row[questionScore.wrong?'retry':'clean']++;tracker.days[day]=row;saveTracker();syncDailyStars();
+}
+function renderTracker(){
+ $('trackerTitle').textContent=playerName()+'’s Star Tracker';
+ $('trackerEmpty').textContent='Complete your first question to start '+playerName()+'’s history.';
+ const today=localDate(),start=new Date(today+'T12:00:00');start.setDate(start.getDate()-(start.getDay()+6)%7);const monday=localDate(start);let total=0,week=0,questions=0;
+ for(const [day,row] of Object.entries(tracker.days)){total+=row.stars;questions+=row.clean+row.retry;if(day>=monday&&day<=today)week+=row.stars}
+ $('trackerToday').textContent='★ '+(tracker.days[today]?.stars||0);$('trackerWeek').textContent='★ '+week;$('trackerTotal').textContent='★ '+total;$('trackerQuestions').textContent=questions;
+ $('trackerStorageNote').textContent=trackerStorageOK?'Saved in this browser. Clearing website data can erase progress. Export a backup occasionally.':'Browser saving is unavailable. Progress is temporary—export a backup before closing this page.';
+ $('calendarMonth').textContent=calendarDate.toLocaleDateString(undefined,{month:'long',year:'numeric'});const calendar=$('starCalendar');calendar.replaceChildren();
+ for(const name of ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']){const cell=document.createElement('div');cell.className='calendar-weekday';cell.textContent=name;calendar.append(cell)}
+ const year=calendarDate.getFullYear(),month=calendarDate.getMonth(),offset=(new Date(year,month,1).getDay()+6)%7;
+ for(let i=0;i<offset;i++){const blank=document.createElement('div');blank.setAttribute('aria-hidden','true');calendar.append(blank)}
+ for(let n=1;n<=new Date(year,month+1,0).getDate();n++){const day=localDate(new Date(year,month,n)),row=tracker.days[day],cell=document.createElement('div');cell.className='calendar-day'+(day===today?' today':'')+(row?.stars?' earned':'');cell.textContent=n;const count=document.createElement('strong');count.textContent=row?.stars?'★ '+row.stars:'—';cell.append(count);cell.setAttribute('aria-label',day+': '+(row?.stars||0)+' stars'+(day===today?', today':''));calendar.append(cell)}
+ const history=$('trackerHistory');history.replaceChildren();const days=Object.keys(tracker.days).sort().reverse();$('trackerEmpty').hidden=days.length>0;
+ for(const day of days){const row=tracker.days[day],tr=document.createElement('tr');for(const value of [day,row.stars,row.clean,row.retry]){const td=document.createElement('td');td.textContent=value;tr.append(td)}history.append(tr)}
+ if(Object.values(tracker.days).some(row=>row.legacy)){$('trackerStorageNote').textContent+=' Earlier saved stars are included; their question counts were not recorded.'}
+}
+$('previousMonth').onclick=()=>{calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()-1,1);renderTracker()};
+$('nextMonth').onclick=()=>{calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+1,1);renderTracker()};
+$('exportTracker').onclick=()=>{const backup={...tracker,exportedAt:new Date().toISOString()},blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=(playerName().replace(/[^a-z0-9_-]/gi,'_')||'Player')+'-Star-Tracker-'+localDate()+'.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 syncDailyStars();
-window.addEventListener('focus',syncDailyStars);
-window.addEventListener('storage',event=>{if(event.key===dailyStarsKey)syncDailyStars()});
+window.addEventListener('focus',()=>{if(trackerStorageOK)loadTracker();syncDailyStars()});
+window.addEventListener('storage',event=>{if(event.key===trackerKey){loadTracker();syncDailyStars()}});
 setInterval(syncDailyStars,60000);
+let pendingBackup=null;
+function validateBackup(text){
+ const saved=JSON.parse(text);
+ if(!saved||saved.version!==1||typeof saved.player!=='string'||!saved.player.trim()||saved.player.trim().length>24||!saved.days||typeof saved.days!=='object'||Array.isArray(saved.days))throw Error('This is not a supported Star Tracker backup.');
+ const entries=Object.entries(saved.days);if(entries.length>10000)throw Error('This backup has too many records.');
+ const days={};
+ for(const [day,row] of entries){if(!validDay(day)||!row||!['stars','clean','retry','legacy'].every(k=>Number.isSafeInteger(row[k])&&row[k]>=0&&row[k]<=10000000)||row.stars!==row.clean*2+row.retry+row.legacy)throw Error('The backup contains an invalid daily record.');days[day]={stars:row.stars,clean:row.clean,retry:row.retry,legacy:row.legacy}}
+ return {version:1,player:saved.player.trim(),days};
+}
+function cancelRestore(){pendingBackup=null;$('restorePreview').hidden=true;$('restoreFile').value=''}
+$('importTracker').onclick=()=>{cancelRestore();$('restoreMessage').textContent='';$('restoreFile').click()};
+$('cancelRestore').onclick=cancelRestore;
+$('restoreFile').addEventListener('change',async()=>{
+ const file=$('restoreFile').files[0];if(!file)return;
+ try{if(file.size>2000000)throw Error('Choose a backup smaller than 2 MB.');const backup=validateBackup(await file.text());pendingBackup=backup;const stars=Object.values(backup.days).reduce((sum,row)=>sum+row.stars,0);$('restoreSummary').textContent='Restore '+backup.player+'’s backup: '+Object.keys(backup.days).length+' days, '+stars+' stars. A matching nickname will use its existing profile; otherwise a new player will be added.';$('restorePreview').hidden=false;$('confirmRestore').focus()}
+ catch(error){cancelRestore();$('restoreMessage').textContent=error instanceof Error?error.message:'Could not read that backup.'}
+});
+$('confirmRestore').onclick=()=>{
+ if(!pendingBackup)return;
+ const backup=pendingBackup,existing=profiles.find(p=>p.name.toLocaleLowerCase()===backup.player.toLocaleLowerCase()),id=existing?.id||'p-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),key=id==='eva'?'eva-math-tracker-v1':'eva-math-tracker-v1-'+id;
+ try{
+  const raw=localStorage.getItem(key),current=raw?validateBackup(raw):{days:{}},days={...current.days};
+  for(const [day,row] of Object.entries(backup.days)){if(!days[day]||row.stars>days[day].stars)days[day]=row}
+  const player=existing||{id,name:backup.player},nextProfiles=existing?profiles:[...profiles,player];
+  localStorage.setItem(key,JSON.stringify({version:1,player:player.name,days}));
+  localStorage.setItem(profilesKey,JSON.stringify({players:nextProfiles,active:id}));
+  profiles=nextProfiles;switchPlayer(id);cancelRestore();$('restoreMessage').textContent='Backup restored for '+player.name+'. Your daily history is ready.';
+ }catch{$('restoreMessage').textContent='Could not save this backup. Your existing progress has not been cleared. Check that browser storage is available.'}
+};
+
 </script>
 </body>
 </html>
